@@ -38,6 +38,7 @@ import { useStreamCleanup } from '@/hooks/use-stream-cleanup'
 import { useWorkspacePermissions } from '@/hooks/use-workspace-permissions'
 import { useExecutionStore } from '@/stores/execution/store'
 import { useCopilotStore } from '@/stores/panel-new/copilot/store'
+import { usePanelDesignStore } from '@/stores/panel-new/design/store'
 import { useGeneralStore } from '@/stores/settings/general/store'
 import { useWorkflowDiffStore } from '@/stores/workflow-diff/store'
 import { hasWorkflowsInitiallyLoaded, useWorkflowRegistry } from '@/stores/workflows/registry/store'
@@ -1150,7 +1151,7 @@ const WorkflowContent = React.memo(() => {
     const hash = Object.values(blocks)
       .map(
         (b) =>
-          `${b.id}:${b.type}:${b.name}:${b.position.x.toFixed(0)}:${b.position.y.toFixed(0)}:${b.isWide}:${b.height}:${b.data?.parentId || ''}`
+          `${b.id}:${b.type}:${b.name}:${b.position.x.toFixed(0)}:${b.position.y.toFixed(0)}:${b.height}:${b.data?.parentId || ''}`
       )
       .join('|')
 
@@ -1218,7 +1219,7 @@ const WorkflowContent = React.memo(() => {
           isPending,
         },
         // Include dynamic dimensions for container resizing calculations
-        width: block.isWide ? 450 : 350, // Standard width based on isWide state
+        width: 350, // Standard width
         height: Math.max(block.height || 100, 100), // Use actual height with minimum
       })
     })
@@ -1745,6 +1746,10 @@ const WorkflowContent = React.memo(() => {
   // Update onPaneClick to only handle edge selection
   const onPaneClick = useCallback(() => {
     setSelectedEdgeInfo(null)
+    try {
+      // Clear current design selection when clicking on empty canvas
+      usePanelDesignStore.getState().clearCurrentBlock()
+    } catch {}
   }, [])
 
   // Edge selection
